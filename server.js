@@ -1,4 +1,4 @@
-const PORT = process.env.PORT ||8000;
+const PORT = 8000;
 import express, { json } from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
@@ -8,7 +8,7 @@ const app = express();
 app.use(json());
 app.use(cors());
 
-const API_KEY = "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";
+const API_KEY = process.env.REACT_APP_API_KEY;
 
 app.post('/completions', async (req, res) => {
   const options = {
