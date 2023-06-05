@@ -1,4 +1,4 @@
-const PORT = 8000;
+const PORT = process.env.PORT ||8000;
 import express, { json } from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
