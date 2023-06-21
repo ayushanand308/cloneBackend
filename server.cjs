@@ -1,7 +1,7 @@
 
 const express = require("express");
 const app = express();
-const PORT = 8000;
+const PORT =process.env.PORT|| 8000;
 var jwt = require("jsonwebtoken");
 const { auth } = require("./middleware.cjs");
 const JWT_SECRET = "secret";
