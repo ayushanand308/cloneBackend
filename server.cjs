@@ -17,6 +17,7 @@ const mongoose=require('mongoose');
 const connectDb=require('./dbCon.cjs')
 connectDb();
 const dotenv = require("dotenv")
+import fetch from "node-fetch";
 
 dotenv.config()
 
