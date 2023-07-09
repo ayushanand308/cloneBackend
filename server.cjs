@@ -1,7 +1,7 @@
 
 const express = require("express");
 const app = express();
-const PORT =process.env.PORT|| 8000;
+const PORT =8002;
 var jwt = require("jsonwebtoken");
 const { auth } = require("./middleware.cjs");
 const JWT_SECRET = "secret";
@@ -17,17 +17,26 @@ const mongoose=require('mongoose');
 const connectDb=require('./dbCon.cjs')
 connectDb();
 const dotenv = require("dotenv")
-import fetch from "node-fetch";
+const multer=require('multer')
+
+const {Configuration,OpenAIApi}=require("openai");
+const fs=require('fs');
+
 
 dotenv.config()
 
 
 
 let USER_ID_COUNTER = 0;
+const configuration=new Configuration({
+  apiKey:process.env.REACT_APP_API_KEY
+})
+const openai=new OpenAIApi(configuration);
+
 const API_KEY = process.env.REACT_APP_API_KEY;
 
 
-app.post('/completions',auth,async (req, res) => {
+app.post('/completions',async (req, res) => {
   const options = {
     method: "POST",
     headers: {
@@ -50,7 +59,7 @@ app.post('/completions',auth,async (req, res) => {
   }
 });
 
-app.post('/generations',auth,async (req, res) => {
+app.post('/generations',async (req, res) => {
   const { prompt } = req.body;
 
   const options = {
@@ -132,27 +141,63 @@ app.post('/login',async function(req, res) {
   }
 });
 
+const  storage=multer.diskStorage({
+  destination:(req,file,cb)=>{
+    cb(null,"")
+  },
+  filename:(req,file,cb)=>{
+    console.log('file',file)
+    cb(null,file.originalname)
+  }
+})
+const upload=multer({storage:storage}).single('file')
 
 
-app.get("/download-image", async (req, res) => {
-  try {
-    const imageUrl = req.query.url;
-    const response = await fetch(imageUrl);
-    const buffer = await response.buffer();
-    res.set("Content-Type", response.headers.get("content-type"));
-    res.set("Content-Disposition", "attachment; filename=image.png");
-    res.send(buffer);
-  } catch (error) {
-    console.error("Error proxying image:", error);
-    res.status(500).send("Error proxying image");
+
+
+
+let filePath
+
+
+app.post('/upload', async (req, res) => {
+  upload(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      return res.status(500).json(err);
+    } else if (err) {
+      return res.status(500).json(err);
+    }
+    // Process the uploaded file or perform any other desired operations
+    // without sending a response here
+    console.log(req.file) 
+    filePath=req.file.path
+  });
+});
+
+
+app.post('/variations',async (req, res) => {
+  try{
+    const response = await openai.createImageVariation(
+      fs.createReadStream(filePath),
+      3,
+      "512x512"
+    );
+    res.send(response.data.data);
+
+  }catch(error){
+    console.error(error)
   }
 });
 
-mongoose.connection.once('open',()=>{
-  console.log('connected to mongodb');
-  app.listen(PORT, () => console.log("Your server is running on port " + PORT));
 
-})
+
+
+mongoose.connection.on('open', () => {
+  console.log('Connected to MongoDB');
+  app.listen(PORT, () => console.log("Your server is running on port " + PORT));
+});
+
+
+
 
 
 
