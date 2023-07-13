@@ -3,11 +3,9 @@ const express = require("express");
 const app = express();
 const PORT =8002;
 var jwt = require("jsonwebtoken");
-const { auth } = require("./middleware.cjs");
 const JWT_SECRET = "secret";
 const bodyParser = require("body-parser");
 var jsonParser = bodyParser.json();
-var urlencodedParser = bodyParser.urlencoded({ extended: false });
 const cors = require("cors");
 app.use(cors());
 app.use(jsonParser);
@@ -18,7 +16,7 @@ const connectDb=require('./dbCon.cjs')
 connectDb();
 const dotenv = require("dotenv")
 const multer=require('multer')
-
+const axios = require('axios');
 const {Configuration,OpenAIApi}=require("openai");
 const fs=require('fs');
 
@@ -36,28 +34,28 @@ const openai=new OpenAIApi(configuration);
 const API_KEY = process.env.REACT_APP_API_KEY;
 
 
-app.post('/completions',async (req, res) => {
+app.post('/completions', async (req, res) => {
   const options = {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Authorization": `Bearer ${API_KEY}`,
-      "Content-Type": "application/json"
+      'Authorization': `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: req.body.message }],
-      max_tokens: 1000
-    })
+    data: {
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: req.body.message }],
+      max_tokens: 1000,
+    },
   };
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", options);
-    const data = await response.json();
-    res.send(data);
+    const response = await axios('https://api.openai.com/v1/chat/completions', options);
+    res.send(response.data);
   } catch (error) {
     console.error(error);
   }
 });
+
 
 app.post('/generations',async (req, res) => {
   const { prompt } = req.body;
@@ -68,17 +66,16 @@ app.post('/generations',async (req, res) => {
       "Authorization": `Bearer ${API_KEY}`,
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
+    data:{
       prompt: prompt,
       n: 2,
       size: "1024x1024"
-    })
+    }
   };
 
   try {
-    const response = await fetch("https://api.openai.com/v1/images/generations", options);
-    const data = await response.json();
-    res.send(data);
+    const response = await axios("https://api.openai.com/v1/images/generations", options);
+    res.send(response.data);
   } catch (error) {
     console.error(error);
   }
