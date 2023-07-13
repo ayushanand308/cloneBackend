@@ -51,6 +51,7 @@ app.post('/completions', async (req, res) => {
   try {
     const response = await axios('https://api.openai.com/v1/chat/completions', options);
     res.send(response.data);
+    console.log(`${API_KEY} came from completions endpoint`)
   } catch (error) {
     console.error(error);
   }
