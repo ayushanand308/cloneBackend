@@ -29,6 +29,8 @@ let USER_ID_COUNTER = 0;
 const configuration=new Configuration({
   apiKey:process.env.REACT_APP_API_KEY
 })
+
+console.log(configuration.apiKey);
 const openai=new OpenAIApi(configuration);
 
 const API_KEY = process.env.REACT_APP_API_KEY;
