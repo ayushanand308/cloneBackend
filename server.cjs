@@ -37,14 +37,14 @@ const API_KEY = process.env.REACT_APP_API_KEY;
 app.post('/completions', async (req, res) => {
   const options = {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${API_KEY}`,
-      'Content-Type': 'application/json',
-    },
     data: {
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: req.body.message }],
       max_tokens: 1000,
+    },
+    headers: {
+      'Authorization': `Bearer ${API_KEY}`,
+      'Content-Type': 'application/json',
     },
   };
 
